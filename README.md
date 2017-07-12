@@ -32,8 +32,9 @@ Let's say you want to connect `xUniverse` to tableau.
 npm install
 node server.js
 ```
- If you did everything right you can see the login page on port 1338 where you run the node js server e.g.: http://yourNodeServer:1338.
-4.  Open Tableau Desktop.
+If you did everything right you can see the login page on port 1338 where you run the node js server e.g.: http://yourNodeServer:1338.
+
+4. Open Tableau Desktop.
 5. At the left menu, under 'To a Server' choose 'Web Data Connector'.
 6. Here type in your WDC url (http://yourNodeServer:1338). Now you can see the login page here. For more info about the credentials please check [The login page](#the-login-page) paragraph below. 
 7. After you logged in you should see a tree where you can add the objects which you want to see as data elements in Tableau.
@@ -41,7 +42,7 @@ node server.js
 9. Done! Now you can see SAP Universe objects in Tableau.
 
 
-###The login page
+### The login page
 
 On the login page you have to set 6 fields:
 * `Server` :  The server host or ip where the BO Server is. e.g.: 192.168.223.117
