@@ -28,8 +28,10 @@ Let's say you want to connect `xUniverse` to tableau.
 1. First you need to run `BO Universe Extractor` to get the universe metadata in json for universe `xUniverse`. For more information check the [BO Universe Extractor](https://github.com/starschema/business-objects-universe-extractor).
 2. When you got the json (XUNIVERSE.json) you should copy it to the UniverseMetdata folder. 
 3. After that you should run commands (in the root folder of the project):
- ```npm install
-    node server.js```
+```
+npm install
+node server.js
+```
  If you did everything right you can see the login page on port 1338 where you run the node js server e.g.: http://yourNodeServer:1338.
 4.  Open Tableau Desktop.
 5. At the left menu, under 'To a Server' choose 'Web Data Connector'.
