@@ -67,8 +67,7 @@ app.post('/api/cms', function (req, res) {
 app.get('/api/bo-metadata', function (req, response) {
     var metadataFile = "./UniverseMetdata/" + universeName + ".json";
     var universeMetadata = JSON.parse(fs.readFileSync(metadataFile));
-    var boHandler = new bo(universeMetadata);
-    var metadataResponse = boHandler.getBOData();
+    var metadataResponse = bo.getBOData(universeMetadata);
     response.json(metadataResponse);
 });
 
