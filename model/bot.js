@@ -45,7 +45,6 @@ Bot.prototype.SAPToken = function (_finalCallback) {
     var h = this;
     var serverLogonURL = "http://" + this.serverIP + ":6405/biprws/logon/long";
     var strXML = "<attrs xmlns='http://www.sap.com/rws/bip/'>" +
-                            "<attr name='cms' type='string'>" + this.cmsName + ":6400</attr>" +
                             "<attr name='userName' type='string'>" + this.userName + "</attr>" +
                             "<attr name='password' type='string'>" + this.password + "</attr>" +
                             "<attr name='auth' type='string' possibilities='secEnterprise,secLDAP,secWinAD'>secEnterprise</attr>" +
@@ -71,7 +70,15 @@ Bot.prototype.SAPToken = function (_finalCallback) {
             if (h.ltoken != "") {
                 h.CreateAndSubmitQuery(_finalCallback);
             }
-        }
+        }else{
+			if (response.statusCode == 401) {
+				console.error('ERROR Wrong credentials! ', data);
+				_finalCallback.status(401).send(data);
+			}else{
+				console.error('ERROR During authentication!', data);
+				_finalCallback.status(500).send(data);
+			}
+		}
     });
   
 }
@@ -109,7 +116,10 @@ Bot.prototype.SubmitBOQueryXML = function (bobjQuery, _finalCallback) {
         if (response.statusCode == 200) {
             qId = data.success.id[0];
             h.GetQueryResponse(qId, _finalCallback);
-        }
+        }else{
+			console.error('ERROR During submitting the query!', data);
+		    _finalCallback.status(500).send(data);
+		}
     });
 }
 
@@ -132,7 +142,10 @@ Bot.prototype.GetQueryResponse = function (queryId, _finalCallback) {
             if (typeof _finalCallback !== 'undefined') {
                 _finalCallback.send(sanitized);
             }
-        }
+        }else{
+			console.error('ERROR During getting the query response!', data);
+		    _finalCallback.status(500).send(data);
+		}
     });
 }
 
