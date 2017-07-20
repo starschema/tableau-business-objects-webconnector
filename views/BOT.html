@@ -57,7 +57,7 @@
                         tableau.headersCallback(fieldNames, fieldTypes);
                     },
                     error: function (XMLHttpRequest, textStatus, errorThrown) {
-                        alert("some error");
+                        tableau.abortWithError(errorThrown);
                     }
                 });
             };
@@ -87,7 +87,7 @@
                         }, 1000); // add a little delay so we don't get cut off by Socrata's connection throttling
                     },
                     error: function (XMLHttpRequest, textStatus, errorThrown) {
-                        alert("error");
+                        tableau.abortWithError(errorThrown);
                     }
                 });
             };
