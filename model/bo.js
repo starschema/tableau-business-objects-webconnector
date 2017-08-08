@@ -31,31 +31,31 @@ var createFolderStructure = function(folders, root) {
     var measures = root["measures"];
     var name = root["name"].trim();
 
-    if (!_.isEmpty(attributes) || !_.isEmpty(measures)) {
-        var folderObject = {
+    var folderObject = {
+        Id: name,
+        data: name,
+        attr: {
             Id: name,
-            data: name,
-            attr: {
-                Id: name,
-                selected: false,
-                type: BO_OBJECT_TYPE.Folder,
-                path: ""
-            }
+            selected: false,
+            type: BO_OBJECT_TYPE.Folder,
+            path: ""
         }
-        var children = [];
-        children = children.concat(addAttributeChildren(name, attributes));
-        children = children.concat(addMeasureChildren(name, measures));
-
-        //We're going to find the children of folder and continue generating structure recursively
-        for (var i in folders) {
-            var model = folders[i];
-            if (_.isString(model["parentName"]) && model["parentName"].trim() === name) {
-                children = children.concat(createFolderStructure(folders, model));
-                break;
-            }
-        }
-        folderObject.children = children;
     }
+    var children = [];
+    children = children.concat(addAttributeChildren(name, attributes));
+    children = children.concat(addMeasureChildren(name, measures));
+
+    //We're going to find the children of folder and continue generating structure recursively
+    for (var i in folders) {
+        var model = folders[i];
+        if (_.isString(model["parentName"]) && model["parentName"].trim() === name) {
+            var child = createFolderStructure(folders, model);
+            if(child.children.length > 0){
+                children = children.concat(child);
+            }
+        }
+    }
+    folderObject.children = children;
     return folderObject;
 }
 
