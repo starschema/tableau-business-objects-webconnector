@@ -4,6 +4,7 @@ var client = new Client();
 var parser = new xml2js.Parser();
 var fs = require('fs');
 
+var XML_LOG_FILE_NAME = "boQuery.xml"
 var OBJECT_TEMPLATE = "<resultObject path=\"{OBJPATH}\" id=\"{OBJID}\"/>";
 
 var Bot = function (userName, password, serverIP, cmsName, universeId, selectedObjects) {
@@ -85,6 +86,7 @@ Bot.prototype.SAPToken = function (_finalCallback) {
 
 Bot.prototype.CreateAndSubmitQuery = function (_finalCallback) {
     var boQuery = this.CreateBOQueryXML();
+	fs.writeFile(XML_LOG_FILE_NAME, boQuery);
     var queryId = this.SubmitBOQueryXML(boQuery, _finalCallback);
     
 }
