@@ -4,7 +4,7 @@ var client = new Client();
 var parser = new xml2js.Parser();
 var fs = require('fs');
 
-var XML_LOG_FILE_NAME = "boQuery.xml"
+var XML_LOG_FILE_NAME = "boQueryOutput.xml"
 var OBJECT_TEMPLATE = "<resultObject path=\"{OBJPATH}\" id=\"{OBJID}\"/>";
 
 var Bot = function (userName, password, serverIP, cmsName, universeId, selectedObjects) {
