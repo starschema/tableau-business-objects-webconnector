@@ -51,3 +51,7 @@ On the login page you have to set 6 fields:
 * `Password` : The password to the BO Server.
 * `Universe Name` : The name of the universe you want to load into Tableau (in our example `xUniverse`).
 * `Universe Id` : The ID of the universe (ID of `xUniverse`). You can check the ID in [BOE Central Management Console](https://docs.bmc.com/docs/display/public/bdsda83/Accessing+the+Central+Management+Console)  interface, in the Universes panel, by right clicking on the given universe (`xUniverse`) and check Properties. 
+
+### BO Query logging
+
+In the root folder of the project the boQueryOutput.xml file contains the latest query sent to the SAP BO. 
