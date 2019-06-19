@@ -12,7 +12,7 @@ var port = process.env.port || process.argv[2] || 1338 ;
 
 var app = express();
 app.use(log4js.connectLogger(log4js.getLogger("http"), { level: 'auto', format: ':method :url'}));
-app.use(bodyParser.urlencoded());
+app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 app.use(express.static('public'));
 app.listen(port);
@@ -41,8 +41,8 @@ var universeId;
 
 
 
-app.get('/', function (request, response) {
-    response.sendfile("views/BOT.html");
+app.get('/', function (request, response) {    
+    response.sendFile("views/BOT.html", {root: __dirname});
 });
 
 app.post('/api/cms', function (req, res) {
@@ -76,10 +76,14 @@ app.post('/api/bo-ids', function (req, response) {
     response.send(true);
 });
 
+app.get('/api/bo-schema', function (req, response) {
+    var botHandler = new bot(userName, password, serverIP, cmsName, universeId, selectedObjects);
+    var res = botHandler.GetBOBJSchema(response);    
+});
+
 app.get('/api/bo-data', function (req, response) {
     var botHandler = new bot(userName, password, serverIP, cmsName, universeId, selectedObjects);
-    var res = botHandler.GetBOBJData(response);
-    var _logoff = botHandler.SAPLogoff();
+    var res = botHandler.GetBOBJData(response);    
 });
 
 
