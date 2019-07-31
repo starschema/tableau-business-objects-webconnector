@@ -4,7 +4,8 @@
     <queryData>
       <resultObjects>
         {OBJECTS}
-      </resultObjects>      
+      </resultObjects>
+	    {FILTERS}
     </queryData>
   </querySpecification>
 </query>

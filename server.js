@@ -1,4 +1,5 @@
 ﻿var express = require('express');
+var session = require('express-session');
 var bodyParser = require('body-parser');
 var fs = require('fs');
 var xml2js = require('xml2js');
@@ -15,7 +16,10 @@ app.use(log4js.connectLogger(log4js.getLogger("http"), { level: 'auto', format: 
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 app.use(express.static('public'));
-app.listen(port);
+//app.listen(port);
+
+var os = require("os");
+app.listen(8080, os.hostname());
 
 //-------------------------------------------------------------------
 //Remove below comments in case you want to enable cross domain call
@@ -31,14 +35,6 @@ app.listen(port);
 //app.use(allowCrossDomain);
 
 var selectedObjects;
-var userName;
-var password;
-var serverIP;
-var cmsName;
-var universeName;
-var universeId;
-
-
 
 
 app.get('/', function (request, response) {    
@@ -65,6 +61,7 @@ app.post('/api/cms', function (req, res) {
 });
 
 app.get('/api/bo-metadata', function (req, response) {
+    console.log("get api/bo metadata:");
     var metadataFile = "./UniverseMetdata/" + universeName + ".json";
     var universeMetadata = JSON.parse(fs.readFileSync(metadataFile));
     var metadataResponse = bo.getBOData(universeMetadata);
@@ -78,12 +75,10 @@ app.post('/api/bo-ids', function (req, response) {
 
 app.get('/api/bo-schema', function (req, response) {
     var botHandler = new bot(userName, password, serverIP, cmsName, universeId, selectedObjects);
-    var res = botHandler.GetBOBJSchema(response);    
+    var res = botHandler.GetBOBJSchema(response);
 });
 
 app.get('/api/bo-data', function (req, response) {
     var botHandler = new bot(userName, password, serverIP, cmsName, universeId, selectedObjects);
-    var res = botHandler.GetBOBJData(response);    
+    var res = botHandler.GetBOBJData(response);
 });
-
-

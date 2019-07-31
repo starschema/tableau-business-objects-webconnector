@@ -29,6 +29,7 @@ var generateFolderTree = function (folders) {
 var createFolderStructure = function(folders, root) {
     var attributes = root["attributes"];
     var measures = root["measures"];
+    var filters = root["filters"];
     var name = root["name"].trim();
 
     var folderObject = {
@@ -44,6 +45,7 @@ var createFolderStructure = function(folders, root) {
     var children = [];
     children = children.concat(addAttributeChildren(name, attributes));
     children = children.concat(addMeasureChildren(name, measures));
+    children = children.concat(addFilterChildren(name, filters));
 
     //We're going to find the children of folder and continue generating structure recursively
     for (var i in folders) {
@@ -81,6 +83,34 @@ var addMeasureChildren = function (name, measures) {
             measure.attr.type = BO_OBJECT_TYPE.Measure;
             children.push(measure);
         }
+    }
+    return children;
+}
+
+var addFilterChildren = function (name, filters) {    
+    var filterFolder = {
+        Id: "Filters",
+        data: "Filters",
+        attr: {
+            Id: "Filters",
+            selected: false,
+            type: BO_OBJECT_TYPE.Folder,
+            path: ""
+        }
+    }
+
+    var children = [];
+    if (_.isArray(filters)) {
+        for (var i in filters) {
+            var filter = createFolderPropertyObject(filters[i]);
+            filter.attr.path = "folder\\" + name + "|filter";
+            filter.attr.type = BO_OBJECT_TYPE.Filter;
+            children.push(filter);
+        }
+    }
+    if (children.length > 0) {
+        filterFolder.children = children;
+        return filterFolder;
     }
     return children;
 }

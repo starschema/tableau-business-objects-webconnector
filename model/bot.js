@@ -5,6 +5,7 @@ var parser = new xml2js.Parser();
 var fs = require('fs');
 
 var OBJECT_TEMPLATE = "<resultObject path=\"{OBJPATH}\" id=\"{OBJID}\"/>";
+var FILTER_TEMPLATE = "<filterPart><predefinedFilter path=\"{FILTERPATH}\" id=\"{FILTERID}\"/></filterPart>";
 
 var Bot = function (userName, password, serverIP, cmsName, universeId, selectedObjects) {
     this.userName = userName;
@@ -68,10 +69,15 @@ Bot.prototype.CreateBOQueryXML = function () {
     var xmlString = fs.readFileSync("BOBJQuery.xml").toString();
     var res = xmlString.replace("{UNX_ID}", this.universeId);
     var selectedObjString = "";
+    var selectedFilterString = "";
     for (var i = 0; i < selObjs.length; i++) {
-        selectedObjString += OBJECT_TEMPLATE.replace("{OBJID}", selObjs[i].Id).replace("{OBJPATH}", selObjs[i].Path);
+        if (selObjs[i].Type == 3) { // only 1 predefined filter can be used.
+            selectedFilterString = FILTER_TEMPLATE.replace("{FILTERID}", selObjs[i].Id).replace("{FILTERPATH}", selObjs[i].Path);
+        } else {
+            selectedObjString += OBJECT_TEMPLATE.replace("{OBJID}", selObjs[i].Id).replace("{OBJPATH}", selObjs[i].Path);
+        }
     }
-    res = res.replace("{OBJECTS}", selectedObjString);
+    res = res.replace("{OBJECTS}", selectedObjString).replace("{FILTERS}", selectedFilterString);
     return res;
 }
 
