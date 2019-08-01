@@ -45,7 +45,6 @@ var createFolderStructure = function(folders, root) {
     var children = [];
     children = children.concat(addAttributeChildren(name, attributes));
     children = children.concat(addMeasureChildren(name, measures));
-    children = children.concat(addFilterChildren(name, filters));
 
     //We're going to find the children of folder and continue generating structure recursively
     for (var i in folders) {
@@ -57,6 +56,8 @@ var createFolderStructure = function(folders, root) {
             }
         }
     }
+    
+    children = children.concat(addFilterChildren(name, filters)); // want to add filter as last
     folderObject.children = children;
     return folderObject;
 }

@@ -175,7 +175,7 @@
 
                     switch (_t) {
                         case "0":
-                            $(this).find(".jstree-checkbox").removeClass();
+                            $(this).find(".jstree-checkbox").remove();
                             break;
                         case "1":
                             $(this).find("a").find(".jstree-icon").removeClass().addClass("jstree-iconD");
@@ -194,11 +194,9 @@
             $("#onflycheckboxes").bind("check_node.jstree", function (e, d) {                
                 var tagName = d.args[0].tagName;
                 var refreshing = d.inst.data.core.refreshing;
-                console.log(tagName + ": " + refreshing);
 
                 if ((tagName == "A" || tagName == "INS") && (refreshing != true && refreshing != "undefined")) {
                     var _obj = { Id: d.rslt.obj.attr('Id'), Name: d.rslt.obj.text().trim(), Type: d.rslt.obj.attr('type'), Path: d.rslt.obj.attr("path") };
-                    console.log(_obj);
                     selectedObject.push(_obj);
                     showObjectInList();
                 }
@@ -249,9 +247,7 @@
             $("#selectedObjects").html("");
             $("#selectedObjects").html(allSpan);
         }
-
     </script>
-
 </head>
 <body>
     <section class="wrapper">
@@ -310,12 +306,17 @@
                 <div class="btn-holder"><button type="button" id="cmsButton" class="btn">Connect</button></div>
             </div>
         </div>
-        <div class="content-wrap" id="divCMSSection">
-            <aside class="left-col" id="onflycheckboxes"></aside>
-            <aside class="right-col" id="selectedObjects"></aside>
-
-            <div class="btn-holder">
-                <button type="button" id="goButton" class="btnConnect">Go get it!</button>
+        <div class="flex-body" id="divCMSSection">
+            <div class="flex-row">
+                <div id="onflycheckboxes"></div>
+            </div>
+            <div class="flex-column">
+                <div>
+                    <div id="selectedObjects"></div>
+                </div>
+                <div class="flex-button">
+                    <button type="button" id="goButton" class="btnConnect">Fetch</button>
+                </div>
             </div>
         </div>
     </section>

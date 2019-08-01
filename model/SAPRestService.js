@@ -4,7 +4,7 @@ var parser = new xml2js.Parser();
 var fs = require('fs');
 
 var OBJECT_TEMPLATE = "<resultObject path=\"{OBJPATH}\" id=\"{OBJID}\"/>";
-var FILTER_TEMPLATE = "<filterPart><predefinedFilter path=\"{FILTERPATH}\" id=\"{FILTERID}\"/></filterPart>";
+var FILTER_TEMPLATE = "<predefinedFilter path=\"{FILTERPATH}\" id=\"{FILTERID}\"/>";
 
 /*
  * Note, don't know how this works, but if there's any error throw in any of these functions, the program will not
@@ -81,7 +81,7 @@ SAPRestService.prototype.createBOQueryXML = function() {
     var selectedFilterString = "";
     for (var i = 0; i < selObjs.length; i++) {
         if (selObjs[i].Type == 3) { // only 1 predefined filter can be used it seems?
-            selectedFilterString = FILTER_TEMPLATE.replace("{FILTERID}", selObjs[i].Id).replace("{FILTERPATH}", selObjs[i].Path);
+            selectedFilterString += FILTER_TEMPLATE.replace("{FILTERID}", selObjs[i].Id).replace("{FILTERPATH}", selObjs[i].Path);
             console.log(selectedFilterString);
         } else {
             selectedObjString += OBJECT_TEMPLATE.replace("{OBJID}", selObjs[i].Id).replace("{OBJPATH}", selObjs[i].Path);

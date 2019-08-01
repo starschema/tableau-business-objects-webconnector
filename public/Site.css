@@ -133,3 +133,33 @@ font-weight:bold;
     border: none;
     margin-top: 20px;
 }
+
+.flex-row {
+    flex-direction: row;
+    display: flex;
+    width: 40%;
+}
+
+.flex-column {
+    flex-direction: column;
+    display: flex;
+    width: 100%;
+    align-self: flex-start;
+    border: 1px solid #a7a7a7;
+    box-sizing: border-box;
+}
+
+.flex-button {
+    text-align: center;
+    padding: 20px;
+}
+
+.flex-body {
+    display: flex;
+}
+
+.flex-body div:not([class*="flex"]) {
+    border: 1px solid white;
+    flex: 1 1 300px;
+    width: 100%;
+}
