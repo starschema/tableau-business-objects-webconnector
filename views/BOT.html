@@ -110,30 +110,6 @@
             });
         }
 
-        function removeCheckboxforFolders() {
-            $("#onflycheckboxes").bind("loaded.jstree", function (e, data) {
-                // invoked after jstree has loaded
-                $("#onflycheckboxes li").each(function (i, e) {
-                    var _t = $(this).attr("type");
-
-                    switch (_t) {
-                        case "0":
-                            $(this).find(".jstree-checkbox").removeClass();
-                            break;
-                        case "1":
-                            $(this).find("a").find(".jstree-icon").removeClass().addClass("jstree-iconD");
-                            break;
-                        case "2":
-                            $(this).find("a").find(".jstree-icon").removeClass().addClass("jstree-iconM");
-                            break;
-                        case "3":
-                            $(this).find("a").find(".jstree-icon").removeClass().addClass("jstree-iconF");
-                    }
-                });
-
-            })
-        }
-
         function postSelectedObjects() {
             var h = this;
             var dataSrcUrl = '/api/bo-ids';
@@ -150,69 +126,6 @@
             tableau.connectionData = JSON.stringify({ "schemaUrl": schemaUrl, "dataUrl": dataUrl, "maxRecords": 10 });
             tableau.connectionName = 'TPMS';
             tableau.submit();
-        }
-
-        function bindChckBoxevent() {
-            $("#onflycheckboxes").bind("check_node.jstree", function (e, d) {                
-                var tagName = d.args[0].tagName;
-                var refreshing = d.inst.data.core.refreshing;
-                console.log(tagName + ": " + refreshing);
-
-                if ((tagName == "A" || tagName == "INS") && (refreshing != true && refreshing != "undefined")) {
-                    var _obj = { Id: d.rslt.obj.attr('Id'), Name: d.rslt.obj.text().trim(), Type: d.rslt.obj.attr('type'), Path: d.rslt.obj.attr("path") };
-                    console.log(_obj);
-                    selectedObject.push(_obj);
-                    showObjectInList();
-                }
-            });
-
-
-            $("#onflycheckboxes").bind("uncheck_node.jstree", function (e, d) {
-                var tagName = d.args[0].tagName;
-                var refreshing = d.inst.data.core.refreshing;
-                if ((tagName == "A" || tagName == "INS") && (refreshing != true && refreshing != "undefined")) {
-
-                    selectedObject = $.grep(selectedObject, function (data, index) {
-                        return data["Id"] != d.rslt.obj.attr('Id')
-                    });
-                    showObjectInList();
-                }
-            });
-
-
-            $("#onflycheckboxes").bind("open_node.jstree", function (e, d) {
-                var _fo = d.rslt.obj.find('ul').closest("li"); //first().find(".jstree-checkbox").remove()
-                $.each(_fo, function (index, value) {
-                    if ($(value).attr("type") == 0) {
-                        $(value).find('a').first().find(".jstree-checkbox").remove();
-                    }
-                });
-            });
-
-
-        }
-
-        function showObjectInList() {
-            var objList = [];
-            var allSpan = "";
-            $.each(selectedObject, function (index, value) {
-                objList.push(value["Name"]);
-                var spnText = "";
-                if (value["Type"] == "1") {
-                    spnText = "<span class=\"btnDiv img1\">" + $.trim(value["Name"]) + "</span>";
-                }
-                else if (value["Type"] == "2") {
-                    spnText = "<span class=\"btnDiv img2\">" + $.trim(value["Name"]) + "</span>";
-                }
-                else if (value["Type"] == "3") {
-                    spnText = "<span class=\"btnDiv img3\">" + $.trim(value["Name"]) + "</span>";
-                }
-                allSpan = allSpan + spnText;
-            });
-
-            $("#selectedObjects").html("");
-            $("#selectedObjects").html(allSpan);
-
         }
 
         function ConnectBOCMS() {
@@ -252,7 +165,89 @@
                 },
                 plugins: ["themes", "json_data", "ui", "checkbox"]
             });
+        }
 
+        function removeCheckboxforFolders() {
+            $("#onflycheckboxes").bind("loaded.jstree", function (e, data) {
+                // invoked after jstree has loaded
+                $("#onflycheckboxes li").each(function (i, e) {
+                    var _t = $(this).attr("type");
+
+                    switch (_t) {
+                        case "0":
+                            $(this).find(".jstree-checkbox").removeClass();
+                            break;
+                        case "1":
+                            $(this).find("a").find(".jstree-icon").removeClass().addClass("jstree-iconD");
+                            break;
+                        case "2":
+                            $(this).find("a").find(".jstree-icon").removeClass().addClass("jstree-iconM");
+                            break;
+                        case "3":
+                            $(this).find("a").find(".jstree-icon").removeClass().addClass("jstree-iconF");
+                    }
+                });
+            })
+        }
+
+        function bindChckBoxevent() {
+            $("#onflycheckboxes").bind("check_node.jstree", function (e, d) {                
+                var tagName = d.args[0].tagName;
+                var refreshing = d.inst.data.core.refreshing;
+                console.log(tagName + ": " + refreshing);
+
+                if ((tagName == "A" || tagName == "INS") && (refreshing != true && refreshing != "undefined")) {
+                    var _obj = { Id: d.rslt.obj.attr('Id'), Name: d.rslt.obj.text().trim(), Type: d.rslt.obj.attr('type'), Path: d.rslt.obj.attr("path") };
+                    console.log(_obj);
+                    selectedObject.push(_obj);
+                    showObjectInList();
+                }
+            });
+
+
+            $("#onflycheckboxes").bind("uncheck_node.jstree", function (e, d) {
+                var tagName = d.args[0].tagName;
+                var refreshing = d.inst.data.core.refreshing;
+                if ((tagName == "A" || tagName == "INS") && (refreshing != true && refreshing != "undefined")) {
+
+                    selectedObject = $.grep(selectedObject, function (data, index) {
+                        return data["Id"] != d.rslt.obj.attr('Id')
+                    });
+                    showObjectInList();
+                }
+            });
+
+
+            $("#onflycheckboxes").bind("open_node.jstree", function (e, d) {
+                var _fo = d.rslt.obj.find('ul').closest("li"); //first().find(".jstree-checkbox").remove()
+                $.each(_fo, function (index, value) {
+                    if ($(value).attr("type") == 0) {
+                        $(value).find('a').first().find(".jstree-checkbox").remove();
+                    }
+                });
+            });
+        }
+
+        function showObjectInList() {
+            var objList = [];
+            var allSpan = "";
+            $.each(selectedObject, function (index, value) {
+                objList.push(value["Name"]);
+                var spnText = "";
+                if (value["Type"] == "1") {
+                    spnText = "<span class=\"btnDiv img1\">" + $.trim(value["Name"]) + "</span>";
+                }
+                else if (value["Type"] == "2") {
+                    spnText = "<span class=\"btnDiv img2\">" + $.trim(value["Name"]) + "</span>";
+                }
+                else if (value["Type"] == "3") {
+                    spnText = "<span class=\"btnDiv img3\">" + $.trim(value["Name"]) + "</span>";
+                }
+                allSpan = allSpan + spnText;
+            });
+
+            $("#selectedObjects").html("");
+            $("#selectedObjects").html(allSpan);
         }
 
     </script>

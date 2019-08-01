@@ -3,7 +3,7 @@ var session = require('express-session');
 var bodyParser = require('body-parser');
 var fs = require('fs');
 var xml2js = require('xml2js');
-var bot = require('./model/bot.js');
+var SAPRestService = require('./model/SAPRestService.js');
 var bo = require('./model/bo.js');
 var log4js = require('log4js');
 var log = log4js.getLogger("Web server");
@@ -73,12 +73,47 @@ app.post('/api/bo-ids', function (req, response) {
     response.send(true);
 });
 
-app.get('/api/bo-schema', function (req, response) {
-    var botHandler = new bot(userName, password, serverIP, cmsName, universeId, selectedObjects);
-    var res = botHandler.GetBOBJSchema(response);
+app.get('/api/bo-schema', async function (req, response) {
+    var sapRestSvc = new SAPRestService(userName, password, serverIP, cmsName, universeId, selectedObjects);
+    try {
+        await sapRestSvc.logon();
+        var queryId = await sapRestSvc.createQuery();
+        var schemas = await sapRestSvc.getQuerySchema(queryId);
+        response.send(schemas); // not really understan
+        await sapRestSvc.logoff();
+    } catch (err) {
+        handleError(err, response);
+        await sapRestSvc.logoff();
+    }
 });
 
-app.get('/api/bo-data', function (req, response) {
-    var botHandler = new bot(userName, password, serverIP, cmsName, universeId, selectedObjects);
-    var res = botHandler.GetBOBJData(response);
+app.get('/api/bo-data', async function (req, response) {
+    var sapRestSvc = new SAPRestService(userName, password, serverIP, cmsName, universeId, selectedObjects);
+    try {
+        await sapRestSvc.logon();
+        var queryId = await sapRestSvc.createQuery();
+        var data = await sapRestSvc.getQueryData(queryId);
+        response.send(data);
+        await sapRestSvc.logoff();
+    } catch (err) {
+        console.log((err.response ? err.response.data.message : err.message));
+        await sapRestSvc.logoff();
+    }
 });
+
+function handleError(err, response) {
+    var errMsg;
+    var status = 500; // default generic code
+    if (err.response) {
+        status = err.response.status;
+        if (err.response.data.message) {
+            errMsg = err.response.data.message;
+        } else {
+            errMsg = err.response.data;
+        }            
+    } else {
+        errMsg = err.message;
+    }
+    response.statusMessage = errMsg;
+    response.status(status).end();
+}
