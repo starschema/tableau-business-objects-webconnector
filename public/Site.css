@@ -37,17 +37,20 @@
 }
 
 .right-col {
-    width: 70%;
+    position: relative;
     float: left;
+    width: 70%;
+    left: 10%;
     border: 1px solid #a7a7a7;
     box-sizing: border-box;
     min-height: 400px;
 }
 
 .btn-holder {
-    clear: both;
-    width: 100%;
+    position: relative;
     float: left;
+    width: 70%;
+    left: 10%;
     box-sizing: border-box;
     padding: 0 0 0 30%;
     margin: 10px 0 0 0;
@@ -79,13 +82,12 @@ input[type="button"] {
 }
 
 .botheader {
-text-align:center;
-align-content:center;
-margin-bottom:10px;
-margin-top:10px;
-font-weight:bold;
+    text-align:center;
+    align-content:center;
+    margin-bottom:10px;
+    margin-top:10px;
+    font-weight:bold;
 }
-
 
 .loginDivCenter {
     position: absolute;
@@ -115,8 +117,6 @@ font-weight:bold;
     margin-left: 140px;
 }
 
-
-
 .cmsSection input[type="text"] {
     border: 1px solid #ccc;
     padding-right: 50px;
@@ -125,41 +125,9 @@ font-weight:bold;
     min-height: 18px;
 }
 
-
-
 .cmsSection.btnConnect {
     background: #f90;
     padding: 4px;
     border: none;
     margin-top: 20px;
-}
-
-.flex-row {
-    flex-direction: row;
-    display: flex;
-    width: 40%;
-}
-
-.flex-column {
-    flex-direction: column;
-    display: flex;
-    width: 100%;
-    align-self: flex-start;
-    border: 1px solid #a7a7a7;
-    box-sizing: border-box;
-}
-
-.flex-button {
-    text-align: center;
-    padding: 20px;
-}
-
-.flex-body {
-    display: flex;
-}
-
-.flex-body div:not([class*="flex"]) {
-    border: 1px solid white;
-    flex: 1 1 300px;
-    width: 100%;
 }

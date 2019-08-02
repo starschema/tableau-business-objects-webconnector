@@ -82,11 +82,12 @@ SAPRestService.prototype.createBOQueryXML = function() {
     for (var i = 0; i < selObjs.length; i++) {
         if (selObjs[i].Type == 3) { // only 1 predefined filter can be used it seems?
             selectedFilterString += FILTER_TEMPLATE.replace("{FILTERID}", selObjs[i].Id).replace("{FILTERPATH}", selObjs[i].Path);
-            console.log(selectedFilterString);
         } else {
             selectedObjString += OBJECT_TEMPLATE.replace("{OBJID}", selObjs[i].Id).replace("{OBJPATH}", selObjs[i].Path);
-            console.log(selectedObjString);
         }
+    }
+    if (selectedFilterString.length > 0) {
+        selectedFilterString = "<filterPart>" + selectedFilterString + "</filterPart>";
     }
     res = res.replace("{OBJECTS}", selectedObjString).replace("{FILTERS}", selectedFilterString);
     console.log(res);
