@@ -19,7 +19,7 @@ app.use(express.static('public'));
 //app.listen(port);
 
 var os = require("os");
-app.listen(8080, os.hostname());
+app.listen(8081, os.hostname());
 
 //-------------------------------------------------------------------
 //Remove below comments in case you want to enable cross domain call
@@ -36,34 +36,60 @@ app.listen(8080, os.hostname());
 
 var selectedObjects;
 
+// TODO: some kind of persistent data containing username and password.
+var userName = "boUserName";
+var password = "boPassword";
+
+// TODO: some kind of persistent data containing accepted username and passwords for authentication to WDC.
+var acceptedUsers = { 
+    "kbui" : "kbui",
+    "skalki" : "skalki",
+    "kritiv" : "kritiv"
+}
 
 app.get('/', function (request, response) {    
     response.sendFile("views/BOT.html", {root: __dirname});
 });
 
-app.post('/api/cms', function (req, res) {
-    userName = req.body["UserName"];
-    password = req.body["Password"];
+app.post('/api/cms', async function (req, response) {
     serverIP = req.body["Server"];
     cmsName = req.body["CMS"];
     universeName = req.body["UnxName"];
     universeId = req.body["UnxId"];
 
-    var metadataFile = "./UniverseMetdata/" + universeName + ".json";
-    fs.access(metadataFile, fs.R_OK, function(e) {
-        if (!e) {
-            res.sendStatus(200);
-        } else {
-            log.error("Couldn't access metadata file " + metadataFile);
-            res.sendStatus(500);
-        }
-    });
+    if (acceptedUsers[req.body["UserName"]] == req.body["Password"]) {
+        var metadataFile = "./UniverseMetdata/" + universeName + ".json";
+        fs.access(metadataFile, fs.R_OK, function(e) {
+            if (!e) {
+                response.sendStatus(200);
+            } else {
+                log.error("Couldn't access metadata file " + metadataFile);
+                response.sendStatus(500);
+            }
+        });
+    } else {
+        log.error("Invalid username or password");
+        response.statusMessage = "Invalid username or password";
+        response.sendStatus(500);
+    }
+});
+
+app.get('/api/bo-fav/:favName', function(req, response) {        
+    selectedObjects = bo.getFavorite(req.params.favName);
+    response.send(selectedObjects);
+});
+
+app.post('/api/bo-fav', function(req, response) {
+    var favName = req.body["favName"];
+    selectedObjects = JSON.parse(req.body.data);
+    bo.addToFavorite(favName, selectedObjects);
+    response.send(true);
 });
 
 app.get('/api/bo-metadata', function (req, response) {
     console.log("get api/bo metadata:");
     var metadataFile = "./UniverseMetdata/" + universeName + ".json";
-    var universeMetadata = JSON.parse(fs.readFileSync(metadataFile));
+    var universeMetadata = JSON.parse(fs.readFileSync(metadataFile));    
     var metadataResponse = bo.getBOData(universeMetadata);
     response.json(metadataResponse);
 });
@@ -76,6 +102,8 @@ app.post('/api/bo-ids', function (req, response) {
 app.get('/api/bo-schema', async function (req, response) {
     var sapRestSvc = new SAPRestService(userName, password, serverIP, cmsName, universeId, selectedObjects);
     try {
+        // node.js closes socket after 2 minutes, causing browser to resend ajax. This is to prevent it from resubmitting ajax call.
+        response.setTimeout(0);
         await sapRestSvc.logon();
         var queryId = await sapRestSvc.createQuery();
         var schemas = await sapRestSvc.getQuerySchema(queryId);
@@ -90,6 +118,8 @@ app.get('/api/bo-schema', async function (req, response) {
 app.get('/api/bo-data', async function (req, response) {
     var sapRestSvc = new SAPRestService(userName, password, serverIP, cmsName, universeId, selectedObjects);
     try {
+        // node.js closes socket after 2 minutes, causing browser to resend ajax. This is to prevent it from resubmitting ajax call.
+        response.setTimeout(0);
         await sapRestSvc.logon();
         var queryId = await sapRestSvc.createQuery();
         var data = await sapRestSvc.getQueryData(queryId);

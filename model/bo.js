@@ -5,17 +5,54 @@ var BO_OBJECT_TYPE =
     Folder : 0,
     Attribute : 1,
     Measure : 2,
-    Filter: 3
+    Filter: 3,
+    Favorite: 4
 }
+
+var favoriteFolder = {
+    Id: "Favorites", data: "Favorites",
+    attr: { Id: "Favorites", selected: false, type: BO_OBJECT_TYPE.Folder, path: "" }
+};
+
+var favorites = [];
 
 module.exports = {
     getBOData: function (metadata) {
         return generateFolderTree(metadata["folders"]["folders"]);
+    },
+
+    getFavorite: function(favName) {        
+        for (var i = 0; i < favorites.length; i++) {                   
+            if (favorites[i].name == favName) {
+                return favorites[i].selectedObjects;
+            }
+        }
+        return null;
+    },
+
+    addToFavorite: function(favName, selectedObjects) {        
+        var favItem = {
+            Id: favName,
+            data: favName,
+            attr: {
+                Id: favName,
+                selected: false,
+                type: BO_OBJECT_TYPE.Favorite,
+                path: ""
+            }
+        }
+        if (!favoriteFolder.children) {
+            favoriteFolder.children = [];
+        }
+        favoriteFolder.children.push(favItem);
+        favorites.push({ name: favName, selectedObjects: selectedObjects });        
     }
 }
 
 var generateFolderTree = function (folders) {
     var folderTree = [];
+    folderTree.push(favoriteFolder);
+
     for (var i in folders) {
         var folder = folders[i];
         //If the folder is top-level(having no parent) folder we generate the corresponding tree

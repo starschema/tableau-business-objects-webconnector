@@ -17,12 +17,14 @@
             var myConnector = tableau.makeConnector();
 
             myConnector.init = function (initCallback) {
+                tableau.authType = tableau.authTypeEnum.basic;
                 myConnector._recordsFetched = 0;
                 tableau.incrementalExtractColumn = "lineNum";
                 initCallback();
             };
 
             myConnector.getSchema = function (schemaCallback) {
+                console.log("getSchema called");
                 var connectionData = JSON.parse(tableau.connectionData);
                 var connectionUrl = connectionData.schemaUrl;
                 $.ajax({
@@ -31,6 +33,7 @@
                     success: function (res, status, xhr) {
                         var cols = [];
                         
+
                         for (var i = 0; i < res.length; i++) {
                             var item = res[i];
                             var col = { id: item.Name, dataType: tableau.dataTypeEnum.string };
@@ -61,26 +64,39 @@
                 });
             };
 
-            myConnector.getData = function (table, doneCallback) {                
+            myConnector.getData = function (table, doneCallback) {
+                console.log("getData called");
                 var connectionData = JSON.parse(tableau.connectionData);
                 var connectionUrl = connectionData.dataUrl;
                 var xhr = $.ajax({
                     url: connectionUrl,
                     dataType: 'json',
-                    success: function (data) {
+                    success: function (data) {                        
                         window.setTimeout(function () {
-                            data.map(function(d) {
-                                for (var key in d) {                                    
-                                    if (typeof d[key] != "string") {
+                            var chunks = [];
+                            var rowAdded = 0;
+                            for (var i = 0; i < data.length; i++) {
+                                var obj = data[i];
+                                // transform the date value of each data to Date datatype.
+                                for (var key in obj) {                                    
+                                    if (typeof obj[key] != "string") {
                                         continue;
                                     }
-                                    if (d[key].indexOf("/Date(") != -1) {
-                                        var dateStr = d[key].replace("/Date(", "new Date(");
-                                        d[key] = eval(dateStr.substring(0, dateStr.length - 1));
+                                    if (obj[key].indexOf("/Date(") != -1) {
+                                        var dateStr = obj[key].replace("/Date(", "new Date(");
+                                        obj[key] = eval(dateStr.substring(0, dateStr.length - 1));                                        
                                     }
                                 }
-                            });
-                            table.appendRows(data);
+                                // Could take minutes to populate all records.
+                                chunks.push(obj);
+                                ++rowAdded;
+                                if (chunks.length >= 1000) { // if we have 1000 records ready
+                                    table.appendRows(chunks); // populate the table with those 100.
+                                    chunks = [];
+                                }
+                            }
+
+                            table.appendRows(chunks);
                             doneCallback();
                         }, 1000); // add a little delay so we don't get cut off by Socrata's connection throttling                                                
                     },
@@ -95,8 +111,14 @@
 
 
         $(document).ready(function () {
-            $("#divCMSLoginSection").show();
-            $("#divCMSSection").hide();
+            if (tableau.password) {
+                FillJSTree();
+                $(".loginDivCenter").hide();
+                $("#divCMSSection").show();
+            } else {
+                $("#divCMSLoginSection").show();
+                $("#divCMSSection").hide();
+            }
             bindButtonevent();
         });
 
@@ -108,9 +130,17 @@
             $("#cmsButton").click(function () {
                 ConnectBOCMS();
             });
+
+            $("#favButton").click(function() {
+                addToFavorite();
+            });
         }
 
         function postSelectedObjects() {
+            if (selectedObject.length == 0) {
+                alert("Error - No dimension or measure was selected.");
+                return;
+            }
             var h = this;
             var dataSrcUrl = '/api/bo-ids';
             var data = { data: JSON.stringify(selectedObject) };
@@ -129,6 +159,9 @@
         }
 
         function ConnectBOCMS() {
+            tableau.username = $("#txtUserName").val();
+            tableau.password = $("#txtPassword").val();
+
             var cmsLogin = {
                 UserName: $("#txtUserName").val(),
                 Password: $("#txtPassword").val(),
@@ -137,12 +170,15 @@
                 UnxName: $("#txtUnxName").val(),
                 UnxId: $("#txtUnxId").val()
             };
-            $.post('/api/cms', cmsLogin, function (d) {
+            $.post('/api/cms', cmsLogin, function (d) {                
                 FillJSTree();
                 $(".loginDivCenter").hide();
                 $("#divCMSSection").show();
+            }).fail(function(error) {                
+                // hack way of returning error to Tableau.                
+                tableau.abortWithError(text);
             });
-        }
+        }        
 
         function FillJSTree() {
             var h = this;
@@ -185,6 +221,9 @@
                             break;
                         case "3":
                             $(this).find("a").find(".jstree-icon").removeClass().addClass("jstree-iconF");
+                            break;
+                        case "4":                            
+                            $(this).find("a").find(".jstree-icon").remove();
                     }
                 });
             })
@@ -219,9 +258,15 @@
             $("#onflycheckboxes").bind("open_node.jstree", function (e, d) {
                 var _fo = d.rslt.obj.find('ul').closest("li"); //first().find(".jstree-checkbox").remove()
                 $.each(_fo, function (index, value) {
-                    if ($(value).attr("type") == 0) {
+                    if ($(value).attr("type") == 0) {                        
                         $(value).find('a').first().find(".jstree-checkbox").remove();
                     }
+                    if ($(value).attr("id") == "Favorites") {
+                        $(value).find('a').find(".jstree-checkbox").remove();
+                        $(value).find('a').on("click", function() {
+                            getFavorite($(this).text());
+                        })
+                    }             
                 });
             });
         }
@@ -246,6 +291,29 @@
 
             $("#selectedObjects").html("");
             $("#selectedObjects").html(allSpan);
+        }
+
+        function addToFavorite() {            
+            var dataSrcUrl = '/api/bo-fav';
+            var favoriteName = $("#favName").val();
+            if (favoriteName == null || favoriteName.trim() == "") {
+                alert("Please provide a name to identify this favorite.");
+                return;
+            }
+            var data = { data: JSON.stringify(selectedObject), favName: favoriteName };
+            
+            $.post(dataSrcUrl, data, function (d) {
+                FillJSTree(); // rebuild the tree after adding favorite
+            });
+        }
+
+        function getFavorite(favName) {
+            var dataSrcUrl = '/api/bo-fav/' + favName;
+            
+            $.get(dataSrcUrl, function (d) {
+                selectedObject = d;
+                showObjectInList();
+            });
         }
     </script>
 </head>
@@ -300,7 +368,7 @@
                         <label>Universe Id</label>
                     </div>
                     <div class="rightDiv">
-                        <input type="text" id="txtUnxId" value="7763" />
+                        <input type="text" id="txtUnxId" value="54578" />
                     </div>
                 </div>
                 <div class="btn-holder"><button type="button" id="cmsButton" class="btn">Connect</button></div>
@@ -312,7 +380,12 @@
 
             <aside class="left-col"></aside>
             <aside class="btn-holder">
-                <button type="button" id="goButton" class="btnConnect">Go get it!</button>
+                <button type="button" id="goButton" class="btnConnect">Run Query!</button>                
+            </aside>
+
+            <aside class="btn-holder">
+                <input type="text" id="favName" placeholder="favorite name"/>
+                <button type="button" id="favButton" class="btnConnect">Save as Favorite</button>
             </aside>
         </div>
     </section>
